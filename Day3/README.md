@@ -79,3 +79,10 @@ Pod 是 Kubernetes 對象模型中最小、最基礎的單元。它代表了應�
 在簡單的理解 Kubernetes 的結構後，可能對於其實際運用的概念還是一片茫然，但隨著日後的實戰演練後，會有很多機會回頭反覆驗證這個結構以及背後通訊的機制，然後漸漸內化成自己的理解。
 
 接下來我們將要實際操作 Kubernete ，開始親身體會它的靈活性以及自由度。
+
+Reference from
+
+- **[Kubernetes 架構簡介](https://www.redhat.com/zh/topics/containers/kubernetes-architecture)**
+- ****[Kubernetes Components](https://kubernetes.io/docs/concepts/overview/components/)****
+- **[[Kubernetes] Cluster Architecture](https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-Cluster-Architecture/)**
+- ****[Kubernetes 基本概念](https://kubernetes.feisky.xyz/introduction/concepts)****
