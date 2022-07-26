@@ -42,6 +42,11 @@
 - Secrets：
 
   而 `Secrets` 字面上就可以明白相較於 `ConfigMap` 用來存放偏向佈署面的檔案， `Serects` 通常是用來存放敏感的資料，像是使用者帳密、憑證等等，而他一樣也具備 `ConfigMap` 擁有的功能並且還有專屬於 `Serects` 才有的特性，如 Secret 會將內部資料進行 `base64` 編碼。
+- PV & PVC (PersistentVolume, PersistentVolumeClaim)：
+
+  `PV` 是集群中的一塊儲存資源，可以由管理者事先設定，是屬於集群的資源，所以他們擁有獨立於任何使用 `PV` 的 `Pod` 的生命週期。
+
+  而 `PVC` 表達的是使用者對於儲存的請求，像是 `Pod` 會對 `Node` 的資源請求（CPU 或內存）， `PVC` 同樣的也會請求並且消耗 `PV` 的限額。
 
 
 ## 結論
