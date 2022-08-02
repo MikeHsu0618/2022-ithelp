@@ -1,30 +1,30 @@
-# Day14 Kubernetes Volume (四) - Secrets
+# Day14 Kubernetes Volume (四) - Secret
 
 ## 概述
 
-在上一篇文章中我們提到了 `ConfigMap` 這個 `Kubernetes` 讓我們解耦程式碼複雜度以及統一管理設定檔的好工具，但由於 `ConfigMap` 是使用明碼儲存一些不敏感的資料，那我們的 `API Key` 和 `金鑰` 等敏感資料就不太適合了呢。於是 `Kubernetes` 提供我們另一種選擇 - `Secrets` 類似於 `ConfigMap` 的使用方式但他能對敏感資料有多一層保護而不會隨便暴露，但有趣的是 `Secrets` 某方面來說也不是像是字面上的那麼安全，下面我們將會簡單談到他的運作原理。
+在上一篇文章中我們提到了 `ConfigMap` 這個 `Kubernetes` 讓我們解耦程式碼複雜度以及統一管理設定檔的好工具，但由於 `ConfigMap` 是使用明碼儲存一些不敏感的資料，那我們的 `API Key` 和 `金鑰` 等敏感資料就不太適合了呢。於是 `Kubernetes` 提供我們另一種選擇 - `Secret` 類似於 `ConfigMap` 的使用方式但他能對敏感資料有多一層保護而不會隨便暴露，但有趣的是 `Secret` 某方面來說也不是像是字面上的那麼安全，下面我們將會簡單談到他的運作原理。
 
-## ****什麼是 Secrets ?****
+## ****什麼是 Secret ?****
 
-`Secrets` 與 `ConfigMap` 在基本操作上大致相同，但在使用的方面不太一樣，所以這裡來特別提一下兩者比較不同的地方。`Secrets` 是 `Kubernetes` 提供開發者存放敏感資料的方式， `Kubernetes` 本身也使用了相同的機制來存放 `Access Token` ，並限制 API 的存取權限，確保不會有外部服務隨意操作。
+`Secret` 與 `ConfigMap` 在基本操作上大致相同，但在使用的方面不太一樣，所以這裡來特別提一下兩者比較不同的地方。`Secret` 是 `Kubernetes` 提供開發者存放敏感資料的方式， `Kubernetes` 本身也使用了相同的機制來存放 `Access Token` ，並限制 API 的存取權限，確保不會有外部服務隨意操作。
 
-`Secrets` 大致有三種類型：
+`Secret` 大致有三種類型：
 
-1. `Service Account`：由 k8s 自動建立並掛載到 Pod，用來存取 k8s API 使用，你可以在 `/run/secrets/kubernetes.io/serviceaccount` 目錄中找到。
+1. `Service Account`：由 k8s 自動建立並掛載到 Pod，用來存取 `Kubernetes` API 使用，你可以在 `/run/secret/kubernetes.io/serviceaccount` 目錄中找到。
 2. `Opaque`：以 base64 編碼的 Secret，用來儲存 密碼、金鑰等等。
-3. `docker-registry`：如果映像檔是放在私有的 Registry，就需要使用這種類型的 `Secrets` 。
+3. `docker-registry`：如果映像檔是放在私有的 Registry，就需要使用這種類型的 `Secret` 。
 
 在 `Kubernetes` 存取資料有以下幾種常見的方式：
 
-1. 將 `Secrets` 當作環境變數使用。
-2. 將 `Secrets File` 掛載在 `Pod` 中的某個路徑下面使用。
+1. 將 `Secret` 當作環境變數使用。
+2. 將 `Secret File` 掛載在 `Pod` 中的某個路徑下面使用。
 3. 在 `Pod` 中加入 `docker-registry secret` 讓我們不用在拉取私人庫時都需要先 `docker login` ，簡單來說是儲存 `docker login` 的帳號密碼讓 `Kubernetes` 可以自動登入順利運作。
 
-## 建立 Secrets
+## 建立 Secret
 
-在建立 `Secrets` 的值時，我們都要必須先使用 `base64` 進行轉碼，而 `Kubernetes` 在我們正確掛載後會自動幫我們解碼回原本的值。
+在建立 `Secret` 的值時，我們都要必須先使用 `base64` 進行轉碼，而 `Kubernetes` 在我們正確掛載後會自動幫我們解碼回原本的值。
 
-1. 將 `Secrets` 轉換為 `base64` ：
+1. 將 `Secret` 轉換為 `base64` ：
 
    首先我們可以使用內建語法取得經過 `base64` 的字串
 
@@ -173,7 +173,7 @@ spec:
 
 因為沒有實際操作過，這裡就先點到為止，主要目的是可以讓大家從另一個角度去思考一個工具的利弊以及取捨，接下來我們還會繼續介紹其他常用的 `Volume` 類別，敬請期待～
 
-Referrence
+Reference
 
 ****[使用Secret 安全地分發憑證](https://kubernetes.io/zh-cn/docs/tasks/inject-data-application/distribute-credentials-secure/)****
 
