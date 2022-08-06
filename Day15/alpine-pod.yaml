@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: apline-pod
+  name: alpine-pod
 spec:
   containers:
     - name: alpine
