@@ -8,7 +8,7 @@
 
 `Docker-Desktop` 提供的 `Kubernetes` 沒有幫我們預設安裝 Metrics Server，而像是 GKE 在一開始使用上就可以使用 Google 自帶的資源監控服務，這些資源指標 API 透過 API Server `/apis/metrics.k8s.io` 進行存取，Metrics Server 是集群級別的數據聚和器(aggregator)，透過將 `kube-aggregator` 佈署到 API Server 上，基於 `kubelet` 收集各個節點的指標數據再將數據儲存在 Metrics Server 的 Memory 中(代表不會保存歷史數據，重啟資料就會消失)，再以 API 的形式提供出來。
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/6399222b-578e-4e23-af8e-fe65cb402d6b/Untitled.png)
+![metrics-api](metrics-api.png)
 
 ### 安裝 Metrics Server
 
