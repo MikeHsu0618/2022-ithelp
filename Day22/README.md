@@ -246,8 +246,6 @@ spec:
             - "while true; do timeout 0.2s yes >/dev/null; sleep 0.5s; done"
 ```
 
-這時我們設定一個 deployment，並且將 requests 設很低 limits 設很高，來驗證 VPA 是否能幫我們如預期的調整 `requests/limits` 。
-
 ```python
 # vpa.yaml
 
