@@ -16,13 +16,13 @@ spec:
       containers:
         - name: hamster
           image: k8s.gcr.io/ubuntu-slim:0.1
-#          resources:
-#            requests:
-#              cpu: 100m
-#              memory: 50Mi
-#            limits:
-#              cpu: 2000m
-#              memory: 2Gi
+          resources:
+            requests:
+              cpu: 100m
+              memory: 50Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
           command: ["/bin/sh"]
           args:
             - "-c"
