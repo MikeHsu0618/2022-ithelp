@@ -1,16 +1,16 @@
-# Day9 Kubernetes 進階元件 - Ingress
+從異世界歸來的第九天 - Kubernetes 老大哥 - 路由守護神 Ingress
+----
 
 ## 概述
 
-在前兩天的 `Kubernetes 三兄弟 - Service (二)` 我們介紹了 `Service` 這個元件，並且在利用他讓集群中的 `Pod` 可以被外部的我們存取。然而每個物件都需要指定對外的 `port number` 以及 Node 上的 `port mapping` ，這就代表 `愈多的 Service 就要管理愈多的 port number` ，而且現在任何的網站上面如果還需要加上 `port number` 實用性實在大打折扣。
+在前兩天的 `Kubernetes 三兄弟 - 實戰做一個 Service (二)` 我們介紹了 `Service` 這個元件，並且在利用他讓集群中的 `Pod` 可以被外部的我們存取。然而每個物件都需要指定對外的 `port number` 以及 Node 上的 `port mapping` ，這就代表 `愈多的 Service 就要管理愈多的 port number` ，而且現在任何的網站上面如果還需要加上 `port number` 實用性實在大打折扣。
 
 ## 什麼是 Ingress？
 
 Ingress 可以幫我們統一對外的 `port number` ，並且根據 hostname 或是 pathname 決定請求要轉發到哪個 `Service` 上成為更上層的 `LoadBalancer` ，並且 `Kubernetes Ingress` 會統一打開 http 的 80 port 以及 https 的 443 port，解決剛才提到的 port number 紊亂不一的問題。
 
 
-
-![](./ingress.png)
+![https://ithelp.ithome.com.tw/upload/images/20220909/201495626AeXVmPUtc.png](https://ithelp.ithome.com.tw/upload/images/20220909/201495626AeXVmPUtc.png)
 
 ## Ingress 作用
 
@@ -202,7 +202,8 @@ curl localhost
 
 一個 `fanout` 可以根據請求的 URL 將來自同一個 IP 地址的流量轉到到多個 Service。並且實現以下配置：
 
-![](./fanout.png)
+![https://ithelp.ithome.com.tw/upload/images/20220909/20149562cKcYfu1xsc.png](https://ithelp.ithome.com.tw/upload/images/20220909/20149562cKcYfu1xsc.png)
+
 準備相關設定檔：
 
 ```jsx
@@ -363,7 +364,8 @@ sudo vim /etc/hosts
 127.0.0.1 foo.com
 127.0.0.1 bar.com
 
-// 儲存！
+// 在鍵盤中手動輸入下列字元來儲存！
+:wq!
 ```
 
 接著來實際測試：
@@ -381,6 +383,19 @@ curl http://bar.com
 ## 結論
 
 感謝願意看到這裡的同鞋們，到這裡我們可以說是已經初窺 `Kubernetes` 的門徑，熟悉 docker 的人已經有能力可以在本地 run 起自己想要的服務，並且配置 `URL` 路徑實現負載均衡。說說我自己的收穫，因為接觸了 `Kubernetes` 讓我開始學習思考如何實現一套微服務系統，他的出現對我這個之前總是在寫單體式應用的小廢廢來說，對分佈式架構有個更清晰的輪廓並且深深著迷，還有太多東西可以學習了，就讓我們繼續堅持下去吧。
+
+相關文章：
+- [從異世界歸來的第三天 - Kubernetes 的組件](https://ithelp.ithome.com.tw/articles/10287576)
+
+- [從異世界歸來的第六天 - Kubernetes 三兄弟 - 實戰做一個 Pod (一)](https://ithelp.ithome.com.tw/articles/10288199)
+
+- [從異世界歸來的第七天 - Kubernetes 三兄弟 - 實戰做一個 Service (二)](https://ithelp.ithome.com.tw/articles/10288389)
+
+- [從異世界歸來的第八天 - Kubernetes 三兄弟 - 實戰做一個 Deployment (三)](https://ithelp.ithome.com.tw/articles/10288602)
+
+
+相關程式碼同時收錄在：
+https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day9
 
 Reference
 
