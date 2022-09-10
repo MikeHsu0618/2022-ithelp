@@ -1,405 +1,214 @@
-# 從異世界歸來的第九天 - Kubernetes 三兄弟 - Pod 的生命週期 (四)
+# 從異世界歸來的第十天 - Kubernetes 三兄弟 - Pod 的生命週期 (四)
 
 ## 概述
 
-在前兩天的 `Kubernetes 三兄弟 - 實戰做一個 Service (二)` 我們介紹了 `Service` 這個元件，並且在利用他讓集群中的 `Pod` 可以被外部的我們存取。然而每個物件都需要指定對外的 `port number` 以及 Node 上的 `port mapping` ，這就代表 `愈多的 Service 就要管理愈多的 port number` ，而且現在任何的網站上面如果還需要加上 `port number` 實用性實在大打折扣。
+恭喜堅持到這裡的各位，走完前面幾篇實戰練習已經可以大聲的說：媽我在用 `Kubernetes` 了～，但凡事一定都不會如想像中的單純，接下來我們要正式進入進階基礎篇，帶各位了解除了最基本的基礎外以及其背後的原理。
 
-## 什麼是 Ingress？
+不難發現前面提到的 `Deployment` `Service` 都是以 `Pod` 為中心去實現各種需求，由此可知 `Pod` 的重要性，通常 `Pod` 可以被視為一個服務的單位，包含著一個或一個以上的容器，能不能順利的把你的服務就靠他了，所以我們最好再一開始就可以掌握 `Pod` 的生命週期中每個不同的階段，並且使用各種方法使其保持預期的健康，像是存活/就緒探針、重啟策略等。
 
-Ingress 可以幫我們統一對外的 `port number` ，並且根據 hostname 或是 pathname 決定請求要轉發到哪個 `Service` 上成為更上層的 `LoadBalancer` ，並且 `Kubernetes Ingress` 會統一打開 http 的 80 port 以及 https 的 443 port，解決剛才提到的 port number 紊亂不一的問題。
+## Pod 的生命週期
 
+![https://ithelp.ithome.com.tw/upload/images/20220910/201495622UWlpN82yt.png](https://ithelp.ithome.com.tw/upload/images/20220910/201495622UWlpN82yt.png)
 
-![https://ithelp.ithome.com.tw/upload/images/20220909/201495626AeXVmPUtc.png](https://ithelp.ithome.com.tw/upload/images/20220909/201495626AeXVmPUtc.png)
+`Pod` 的生命週期可以理解成從創建到退出的過程，在這過程中 `Pod` 將會經歷各種不同狀態的變化以及環環相扣的執行，上圖展示了一個 `Pod` 的完整生命週期過程，除了我們的`主容器(main contain)` 外還包括`初始化容器(init container)`、`生命週期鉤子(post start / pre stop hook)`、`健康檢查(liveness / readiness probe)` ，接下來我們就來分別介紹其影響 Pod 生命週期的部分，但在此之前我們需要先了解 Pod 的狀態定義，作為最頂層的狀態顯示可以簡單的反映出當前的具體狀態信息，遇到錯誤時會是第一眼分析排錯的地方。
 
-## Ingress 作用
+### Pod Phase (階段)
 
-Ingress 負責的事情主要被定義為下面幾項：
-
-- 將不同路徑的請求對應到各自的 Service（give services externally-reachable urls ）：只要透過設定好的 hostname 跟 pathname 就可以觸及到對應的 Services 進而存取其對應的 Pods。
-- 流量的負載均衡（load balance traffic）：例如負載均衡算法、後端權重方案等。
-- 支持 SSL Termination：支援 https 的傳輸層安全協定並且擔任起解密的責任，使 Service 與 Pod 之間的溝通都是以無加密方式傳輸，得以正常傳輸資料。
-- 支持虛擬網域設定（offer name based virtual hosting）：Ingress 提供我們在同個 IP 下設定自己的虛擬網域，也就是我們前面提到的 `hostname` 。
-
-## 安裝 Ingress
-
-在本地的 `docker-desktop` 上我們只需要運行下列設定檔，Kubernetes 就會幫我們建立一個 `ingress-nginx` 的 namespace，並且運行起相關服務：
-
-```jsx
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.2.1/deploy/static/provider/cloud/deploy.yaml
-
-------------------------------
-namespace/ingress-nginx unchanged
-serviceaccount/ingress-nginx configured
-serviceaccount/ingress-nginx-admission configured
-role.rbac.authorization.k8s.io/ingress-nginx configured
-role.rbac.authorization.k8s.io/ingress-nginx-admission configured
-clusterrole.rbac.authorization.k8s.io/ingress-nginx configured
-clusterrole.rbac.authorization.k8s.io/ingress-nginx-admission configured
-rolebinding.rbac.authorization.k8s.io/ingress-nginx configured
-rolebinding.rbac.authorization.k8s.io/ingress-nginx-admission configured
-clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx configured
-clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx-admission configured
-configmap/ingress-nginx-controller configured
-service/ingress-nginx-controller created
-service/ingress-nginx-controller-admission created
-deployment.apps/ingress-nginx-controller created
-job.batch/ingress-nginx-admission-create created
-job.batch/ingress-nginx-admission-patch created
-ingressclass.networking.k8s.io/nginx configured
-validatingwebhookconfiguration.admissionregistration.k8s.io/ingress-nginx-admission configured
+```python
+kubectl get pods
+--------
+NAME                            READY   STATUS              RESTARTS        AGE
+admin-server                    1/1     Running             0               37h
+apps                            1/1     Running             0               22d
 ```
 
-檢查是否成功運作：
+這裡指的 Pod Phase 就是我們在查看 Pods 列表所用的 `kubectl get pods` 所帶出的 `STATUS` 欄位。
 
-```jsx
-kubectl get all -n ingress-nginx
+Pod Phase 所包含的狀態數量和定義是嚴格指定的，下面是 `phase` 可能的值：
 
-------------------------------
-NAME                                            READY   STATUS      RESTARTS   AGE                                                      
-pod/ingress-nginx-admission-create-rf8cl        0/1     Completed   0          7m4s
-pod/ingress-nginx-admission-patch-mzmc8         0/1     Completed   0          7m4s
-pod/ingress-nginx-controller-778667bc4b-twt6n   1/1     Running     0          7m4s
+- `Pending`：Pod 信息已經提交給了集群，但是還沒有被調度器調度到合適的節點或者Pod 裡的鏡像正在下載。
+- `Running`：該Pod 已經綁定到了一個節點上，Pod 中所有的容器都已被創建。至少有一個容器正在運行，或者正處於啟動或重啟狀態。
+- `Succeeded`：Pod 中的所有容器都被成功終止，並且不會再重啟。
+- `Failed`：`Pod` 中的所有容器都已終止了，並且至少有一個容器是因為失敗終止。也就是說，容器以數量非零的狀態退出或者被系統終止。
+- `Unknown`：因為某些原因無法取得Pod 的狀態，通常是因為與Pod 所在主機通信失敗導致的。
 
-NAME                                         TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
-service/ingress-nginx-controller             LoadBalancer   10.105.184.158   localhost     80:30205/TCP,443:31820/TCP   7m5s
-service/ingress-nginx-controller-admission   ClusterIP      10.106.69.252    <none>        443/TCP                      7m4s
+![https://ithelp.ithome.com.tw/upload/images/20220910/20149562A7jYOFvL5H.png](https://ithelp.ithome.com.tw/upload/images/20220910/20149562A7jYOFvL5H.png)
 
-NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/ingress-nginx-controller   1/1     1            1           7m4s
+### 重啟策略(restartpolicy)
 
-NAME                                                  DESIRED   CURRENT   READY   AGE
-replicaset.apps/ingress-nginx-controller-778667bc4b   1         1         1       7m4s
+我們可以通過配置`spec.template.spec.restartPolicy`來設置 Pod 中所有容器的重啟策略，其可能值為`Always，OnFailure 和 Never`，默認值為`Always`。容器的應用程序發生錯誤或容器申請超出限制的資源都可能導致 Pod 終止, 此時會根據 `restartPolicy`來決定是否該重建 Pod。以下為三種可選的重啟策略：
 
-NAME                                       COMPLETIONS   DURATION   AGE
-job.batch/ingress-nginx-admission-create   1/1           5s         7m4s
-job.batch/ingress-nginx-admission-patch    1/1           5s         7m4s
-```
+- `Always`: Pod終止就重啟, 此為`default`設定。
+- `OnFailure`: Pod發生錯誤時才重啟。
+- `Never`: 從不重啟。
 
-## 實際練習
+`restartPolicy` 僅指通過kubelet 在同一節點上重新啟動容器。通過 kubelet 重新啟動的退出容器將以指數增加延遲（10s，20s，40s…）重新啟動，上限為5 分鐘，並在成功執行10 分鐘後重置。不同類型的的控制器可以控制Pod 的重啟策略：
 
-關於 `Ingress` 的實際應用，官方有提供幾種方式讓我們用 `URL` 控制並連接到我們指定的服務。
+- `Job`：適用於一次性任務如批量計算，任務結束後 Pod 會被此類控制器清除。Job 的重啟策略只能是`"OnFailure"`或者 `"Never"`。
+- `Replication Controller, ReplicaSet, or Deployment`，此類控制器希望 Pod 一直運行下去，它們的重啟策略只能是`"Always"`。
+- `DaemonSet`：每個節點上啟動一個Pod，很明顯此類控制器的重啟策略也應該是`"Always"`。
 
-### 1. 單一 Service
-
-現有的 Kubernetes 允許我們直接暴露 `單一個 Service` 。現在我們依然可以透過 ingress 的 `defaultBackend` 辦到這件事，代表規範條件以外的流量通通都會遵守 `defaultBackend` 規則分配到對應服務。
-
-準備相關設定檔：
-
-```jsx
-// deployment.yaml
+```python
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: foo-deployment
+  name: my-app
   labels:
-    type: demo
+    app: my-app
 spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      type: demo
-  template:
-    metadata:
-      labels:
-        type: demo
-    spec:
-      containers:
-        - name: foo
-          image: mikehsu0618/foo
-          ports:
-            - containerPort: 8080
-```
-
-```jsx
-// service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: my-service
-spec:
-  selector:
-    type: demo
-  type: NodePort // 這裡我們將能直接暴露端口的 `Loadbalancer` 改成 `NodePort`
-  ports:
-    - protocol: TCP
-      port: 8000
-      targetPort: 8080
-      nodePort: 30390
-```
-
-```jsx
-// ingress.yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-ingress
-spec:
-  ingressClassName: nginx
-  defaultBackend:
-    service:
-      name: my-service
-      port:
-        number: 8000
-```
-
-在上面的 `ingress.yaml` 我們設定了 `defaultBackend` 讓所有流量都預設導到 `my-service` 中的 `8000 port`，形成了一條從 `loadbalancer` → `services` → `pods` 的路徑。
-
-執行以上設定檔：
-
-```jsx
-kubectl apply -f deployment.yaml,service.yaml,ingress.yaml
-----------------------------
-
-deployment.apps/foo-deployment unchanged
-service/my-service unchanged
-ingress.networking.k8s.io/my-ingress unchanged
-```
-
-查看服務狀況：
-
-```jsx
-kubectl get all
-----------------------------
-
-NAME                                  READY   STATUS    RESTARTS   AGE
-pod/foo-deployment-6bbf665b47-6769n   1/1     Running   0          41m
-pod/foo-deployment-6bbf665b47-96khw   1/1     Running   0          41m
-
-NAME                 TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
-service/kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP          27d
-service/my-service   NodePort    10.108.203.7   <none>        8000:30390/TCP   41m
-
-NAME                             READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/foo-deployment   2/2     2            2           41m
-
-NAME                                        DESIRED   CURRENT   READY   AGE
-replicaset.apps/foo-deployment-6bbf665b47   2         2         2       41m
-```
-
-查看 Ingress ：
-
-```jsx
-kubectl get ingress
-----------------------------
-
-NAME         CLASS   HOSTS   ADDRESS     PORTS   AGE
-my-ingress   nginx   *       localhost   80      42m
-```
-
-成功將啟動了一個 [localhost:80](http://localhost:80) 的負載均衡器～
-
-實際測試：
-
-```jsx
-curl localhost
-----------------------------
-
-{"data":"Hello foo"}
-```
-
-### 2. Simple Fanout and Visual hosting
-
-一個 `fanout` 可以根據請求的 URL 將來自同一個 IP 地址的流量轉到到多個 Service。並且實現以下配置：
-
-![https://ithelp.ithome.com.tw/upload/images/20220909/20149562cKcYfu1xsc.png](https://ithelp.ithome.com.tw/upload/images/20220909/20149562cKcYfu1xsc.png)
-
-準備相關設定檔：
-
-```jsx
-// deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: foo-deployment
-  labels:
-    type: foo-demo
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      type: foo-demo
-  template:
-    metadata:
-      labels:
-        type: foo-demo
-    spec:
-      containers:
-        - name: foo
-          image: mikehsu0618/foo
-          ports:
-            - containerPort: 8080
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: bar-deployment
-  labels:
-    type: bar-demo
-spec:
+  serviceName: my-app
   replicas: 1
   selector:
     matchLabels:
-      type: bar-demo
+      app: my-app
   template:
     metadata:
       labels:
-        type: bar-demo
+        app: my-app
     spec:
+      restartPolicy: Always
       containers:
-        - name: bar
-          image: mikehsu0618/bar
-          ports:
-            - containerPort: 8080
+      - name: my-app
+        image: myregistry:443/mydomain/my-app
+        imagePullPolicy: Always
 ```
 
-```jsx
-// service.yaml
+### 初始化容器 (Init Container)
+
+了解了 Pod 的狀態以及重啟策略後，接下來我們要看的在 Pod 生命週期中最先啟動的 `Init Container` 。顧名思義其就是用來在主程序運行之前會被運行完畢的初始程序，可以是一個或多個，如果一個以上的話，這些容器將會按照定義的順序執行。我們知道一個 Pod 裡面可以在所有容器中共享數據和 Network Namespace，所以我們可以常常可以利用初始化容器執行初始化動作使一切資源就緒時再啟動主容器，這樣有益於我們將初始化的邏輯從主容器中解藕出來，變得更加靈活用運。那麼初始化容器還有哪些應用場景呢：
+
+- `等待其他服務就緒`：此作法可以用來解決服務之間的依賴問題，比如說我們有個主服務依賴於另一個數據庫服務，但是在我們啟動這個主服務詞我們並不能保證被依賴的數據庫是否就緒，這時候我們可以簡單使用一個 `init container` 去監測數據庫是否就緒，確認就緒後就能直接退出並且主程序將會在這時候接著啟動。
+- `做初始化配置`：比如集群裡檢測所有已經存在的成員節點，為主容器準備好集群的配置信息，這樣主容器起來後就能用這個配置信息加入集群。
+
+比如現在我們實現一個初始化容器去預先準備首頁內容：
+
+```python
 apiVersion: v1
-kind: Service
+kind: Pod
 metadata:
-  name: foo-service
+  name: init-demo
 spec:
-  type: NodePort
-  selector:
-    type: foo-demo
-  ports:
-    - protocol: TCP
-      port: 8000
-      targetPort: 8080
----
+  volumes:
+  - name: workdir
+    emptyDir: {}
+  initContainers:
+  - name: install
+    image: busybox
+    command:
+    - wget
+    - "-O"
+    - "/work-dir/index.html"
+    - http://www.baidu.com
+    volumeMounts:
+    - name: workdir
+      mountPath: "/work-dir"
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: workdir
+      mountPath: /usr/share/nginx/html
+```
+
+可以簡單的看出 `initContainers` 產生出 `index.html` 隨即退出，並且利用 `volume` 將資料夾目錄掛載到主容器中，實現初始化並共享資源的概念。
+
+### 生命週期鉤子(Lifecircle Hook)
+
+生命週期鉤子會於初始化容器執行完畢後，跟著主程序一起啟動，由 `kubetlet` 發起並且在容器啟動時以及容器終止之前運行，而我們可以為 Pod 中的所有容器配置生命週期鉤子。
+
+`Kubernetes` 為我們提供了兩種鉤子函數：
+
+- `PostStart`：這個鉤子在容器創建後立即執行。但是並不能保證鉤子將在容器入口點(ENTRYPOINT) 之前運行，因為沒有參數傳遞給處理程序。主要用於資源部署、環境準備等。不過需要注意的是如果鉤子花費太長時間以至於不能運行或者掛起，容器將不能達到running 狀態。
+- `PreStop`：這個鉤子在容器終止之前立即被調用。它能阻塞進程意味著它是同步的，所以它必須在刪除容器的調用發出之前完成。主要用於優雅的關閉應用、通知其他系統等。如果鉤子在執行期間掛起，Pod 階段將停留在running 狀態並且永不會達到`failed` 狀態。
+
+以下為設定生命週期鉤子的簡單範例：
+
+```python
 apiVersion: v1
-kind: Service
+kind: Pod
 metadata:
-  name: bar-service
+  name: lifecycle-demo
 spec:
-  type: NodePort
-  selector:
-    type: bar-demo
-  ports:
-    - protocol: TCP
-      port: 8000
-      targetPort: 8080
+  containers:
+  - name: lifecycle-demo-container
+    image: nginx
+    lifecycle:
+      postStart:
+        exec:
+          command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+      preStop:
+        exec:
+          command: ["/bin/sh","-c","nginx -s quit; while killall -0 nginx; do sleep 1; done"]
 ```
 
-```jsx
-// ingress.yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+### 健康檢查(Health Check)
+
+現在在整個主容器運行期間的生命週期中，能影響到 Pod 狀態的就屬健康檢查的這一部分。在 `Kubernetes` 中我們可以透過各種探針來確認容器是否處於正常運作的狀態，像是存活探針(liveness probe)、可讀探針(readiness probe)和啟動探針(startup probe)，如果出現異常將會透過自我檢測雨修復來避免把流量導到不健康的 Pod。
+
+K8s支持四種用在Pod探測的處理器:
+
+- `Exec`: 在容器內執行命命, 再根據其回傳的狀態進行診斷, 回傳`0`表示成功, 其餘皆為失敗。
+- `TCPSocket`: 透過對容器上的 TCP 端口進行檢查, 其端口有打開表示成功, 否則為失敗。
+- `HTTPGet`: 透過對容器 IP 地址上的指定端口發起 http GET 請求進行診斷, 如果回應狀態大於等於200且小於400, 則為成功, 其餘皆為失敗。
+- `gRPC` ：從 v1.24 版本起，可以透過對容器 IP 地址上的指定端口發起 `gRPC` 請求進行診斷，這裡需要注意的使用 `gRPC` 做為 action 時需要特別指定端口。
+
+kubelet 可以執行三種探測:
+
+- `livenessProbe` ：顯示容器是否正常運作, 如果探測失敗`kubelet`會終止容器, 容器會依照重啟策略進行下一個動作。如果容器不支援存活性探測, 則默認狀態為 `Success`
+- `readinessProbe` ： 顯示容器是否準備好提供服務, 如果探測失敗 Endpoint Controller 會從匹配的所有Service Endpoint list 刪除Pod IP。 如果容器不支援就緒性探測, 則默認狀態為 `Success`。
+- `startupProbe` ：顯示容器中的應用是否已經啟動, 如果啟動`startupProbe`則其他探測都會被禁用，直到`startupProbe`成功後其他探針才會開始接管，如果探測失敗 `kubelet` 會終止容器, 容器會依照重啟策略進行下一個動作。如果容器不支援啟用探測, 則默認狀態為 `Success`。
+
+以下為探針設定的簡單範例：
+
+```python
+apiVersion: v1
+kind: Pod
 metadata:
-  name: my-ingress
+  name: goproxy
+  labels:
+    app: goproxy
 spec:
-  ingressClassName: nginx
-  rules:
-    - host: foo.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: foo-service
-                port:
-                  number: 8000
-    - host: bar.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: bar-service
-                port:
-                  number: 8000
+  containers:
+  - name: goproxy
+    image: k8s.gcr.io/goproxy:0.1
+    ports:
+    - containerPort: 8080
+    readinessProbe:
+      tcpSocket:
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 10
+    livenessProbe:
+      tcpSocket:
+        port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 20
 ```
-
-可以在上面的設定檔看到我們用 `ingress` 產生出的 `virsual hosting` 並且使不同的網域對應到不同的 `Service` ，實現預期的 `fanout` 效果。
-
-讓我們運行以上設定檔：
-
-```jsx
-kubectl apply -f deployment.yaml,service.yaml,ingress.yaml
-
-deployment.apps/foo-deployment configured
-deployment.apps/bar-deployment configured
-service/foo-service configured
-service/bar-service configured
-ingress.networking.k8s.io/my-ingress configured
-```
-
-查看 ingress 詳細資訊：
-
-```jsx
-kubectl describe ingress my-ingress
-----------------------------
-
-Name:             my-ingress                     
-Labels:           <none>
-Namespace:        default
-Address:          localhost
-Ingress Class:    nginx
-Default backend:  <default>
-Rules:
-  Host        Path  Backends
-  ----        ----  --------
-  foo.com     
-              /   foo-service:8000 (10.1.1.169:8080,10.1.1.170:8080)
-  bar.com     
-              /   bar-service:8000 (10.1.1.168:8080)
-Annotations:  <none>
-Events:
-  Type    Reason  Age                  From                      Message
-  ----    ------  ----                 ----                      -------
-  Normal  Sync    7m35s (x4 over 15m)  nginx-ingress-controller  Scheduled for sync
-```
-
-Ingress 已經成功的替我們架起了 [foo.com](http://foo.com) [bar.com](http://bar.com) 兩個虛擬網域，並幫我們把服務連接到對應的 `Service` 上～
-
-因為我們是在本地上架起虛擬網域的，所以我們需要讓以上兩個網域反向代理到本地 `127.0.0.1` 上，所以我們這時必須去調整 `/etc/hosts` 檔本地才能順利吃到路徑請求：
-
-```jsx
-sudo vim /etc/hosts
-
-// 在檔案中插入以下需要映射的網域
-127.0.0.1 foo.com
-127.0.0.1 bar.com
-
-// 在鍵盤中手動輸入下列字元來儲存！
-:wq!
-```
-
-接著來實際測試：
-
-```jsx
-curl http://foo.com
-{"data":"Hello foo"}
-
-curl http://bar.com
-{"data":"Hello bar"}
-```
-
-大功告成！
 
 ## 結論
 
-感謝願意看到這裡的同鞋們，到這裡我們可以說是已經初窺 `Kubernetes` 的門徑，熟悉 docker 的人已經有能力可以在本地 run 起自己想要的服務，並且配置 `URL` 路徑實現負載均衡。說說我自己的收穫，因為接觸了 `Kubernetes` 讓我開始學習思考如何實現一套微服務系統，他的出現對我這個之前總是在寫單體式應用的小廢廢來說，對分佈式架構有個更清晰的輪廓並且深深著迷，還有太多東西可以學習了，就讓我們繼續堅持下去吧。
+相信各位無論在學習前後端語言或是各種框架各種應用時，都能常常看到`生命週期` 這個關鍵字眼，能夠理解並善用`生命週期` 可以讓我們了解一個應用在其的一生中都經歷了些什麼，如此一來我們就能在正確的時間點使其為我們最執行出更準確的動作，大大的提升了應用的靈活性以及上限，所以我們當然需要了解被 `Kubernetes` 環繞建構而成的 Pod 的`生命週期` ，是吧是吧！
 
 相關文章：
 - [從異世界歸來的第三天 - Kubernetes 的組件](https://ithelp.ithome.com.tw/articles/10287576)
 
 - [從異世界歸來的第六天 - Kubernetes 三兄弟 - 實戰做一個 Pod (一)](https://ithelp.ithome.com.tw/articles/10288199)
 
-- [從異世界歸來的第七天 - Kubernetes 三兄弟 - 實戰做一個 Service (二)](https://ithelp.ithome.com.tw/articles/10288389)
-
-- [從異世界歸來的第八天 - Kubernetes 三兄弟 - 實戰做一個 Deployment (三)](https://ithelp.ithome.com.tw/articles/10288602)
-
-
 相關程式碼同時收錄在：
-https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day9
+https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day10
 
 Reference
 
-[Kubernetes Documentation-ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+****[Configure Liveness, Readiness and Startup Probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)****
 
-**[[Kubernetes] Resource Object 概觀](https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-ResourceObject-Overview/)**
+****[Pod 的生命週期](https://jimmysong.io/kubernetes-handbook/concepts/pod-lifecycle.html)****
 
-****[Kubernetes 那些事 — Ingress 篇（一）](https://medium.com/andy-blog/kubernetes-%E9%82%A3%E4%BA%9B%E4%BA%8B-ingress-%E7%AF%87-%E4%B8%80-92944d4bf97d)****
+****[POD 生命週期](https://ithelp.ithome.com.tw/articles/10243067)****
+
+****[day 10 Pod(3)-生命週期, 容器探測](https://ithelp.ithome.com.tw/articles/10236314)****
+
+****[API OVERVIEW](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#probe-v1-core)****
+
+**[restartPolicy: Unsupported value: "Never": supported values: "Always"](https://stackoverflow.com/questions/55169075/restartpolicy-unsupported-value-never-supported-values-always)**
