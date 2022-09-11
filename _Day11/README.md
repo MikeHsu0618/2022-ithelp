@@ -1,8 +1,8 @@
-# Day10 Kubectl 指令工具與他的小抄們
+# 從異世界歸來的第十一天 - Kubernetes Kubectl 指令與他的快樂夥伴
 
 ## 概述
 
-在我們先前的介紹中，可以發現 `Kubernetes` 除了撰寫設定檔之外，其他時候就是使用 `kubectl` 這個指令工具進行各項操作，而 `kubectl` 的指令就是我們先前提到的 `kube-apiserve` 的這個元件以 `Restful API` 在底層各種調用的封裝，熟悉指令可以使我們更了解 `Kubernetes` 各種功能的觀念甚至幫助我們舉一反三調試出更靈活的設定。
+在我們先前的介紹中，可以發現 `Kubernetes` 除了撰寫設定檔之外，其他時候就是使用 `kubectl` 這個指令工具進行各項操作，而 `kubectl` 的指令就是我們先前提到的 `kube-apiserver` 的這個元件以 `Restful API` 在底層各種調用的封裝，熟悉指令可以使我們更了解 `Kubernetes` 各種功能的觀念甚至幫助我們舉一反三調試出更靈活的設定。
 
 ## kubectl 語法介紹
 
@@ -220,3 +220,11 @@ kubectl logs -f <pod-name>
 ## 概述
 
 到目前為止我們已經了解了基本的指令以及設定，之後的方向我們將逐漸揭開 `Kubernetes` 的神秘面紗，使用更實際以及更深入的例子來學習各種設定，以及了解該設定的存在的原因。
+
+Reference
+
+**[Kubernetes 教學系列 - kubectl 常見指令說明](https://blog.kennycoder.io/2020/12/18/Kubernetes%E6%95%99%E5%AD%B8%E7%B3%BB%E5%88%97-kubectl%E5%B8%B8%E8%A6%8B%E6%8C%87%E4%BB%A4%E8%AA%AA%E6%98%8E/)**
+
+****[kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)****
+
+****[Command line tool (kubectl)](https://kubernetes.io/docs/reference/kubectl/)****
