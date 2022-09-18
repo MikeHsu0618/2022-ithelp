@@ -1,4 +1,5 @@
-# Day13 Kubernete Volume (三) - ConfigMap
+從異世界歸來的第十八天 - Kubernetes Volume (三) - ConfigMap
+---
 
 ## 概述
 
@@ -38,20 +39,20 @@ CREATE TABLE posts
 CREATE INDEX user_id_key ON posts (user_id);
 
 COMMENT ON COLUMN posts.title IS '標題';
-COMMENT ON COLUMN posts.content IS '內容';
-COMMENT ON COLUMN posts.comments_count IS '評論數';
+    COMMENT ON COLUMN posts.content IS '內容';
+    COMMENT ON COLUMN posts.comments_count IS '評論數';
 ```
 
 ```jsx
 kubectl create configmap pg-initsql --from-file=initdb.sql
 --------
-    configmap/pg-initsql createdg-initsql
+configmap/pg-initsql createdg-initsql
 ```
 
 利用 `kubectl create` 指令將整個檔案設定成一個 `configMap`
 
 <aside>
-💡 看到這裡可能有些人對 `kubectl apply` 跟 `kubectl create` 兩者有點混淆，但可以簡單的理解成 `kubectl create` 明確的告訴 `Kubernetes` 他將建立一個資源物件，而 `kubectl apply` 則通常伴隨著 yaml 設定檔表示該物件應該要怎麼什麼樣子。
+? 看到這裡可能有些人對 `kubectl apply` 跟 `kubectl create` 兩者有點混淆，但可以簡單的理解成 `kubectl create` 明確的告訴 `Kubernetes` 他將建立一個資源物件，而 `kubectl apply` 則通常伴隨著 yaml 設定檔表示該物件應該要怎麼什麼樣子。
 
 </aside>
 
@@ -421,7 +422,15 @@ Indexes:
 
 ## 結論
 
-今天我們實作了 `ConfigMap` 最常見的兩種使用方式，在官方文件中 `ConfigMap` 還有其他更進接的操作方式，這裡就先簡單介紹可以應付多數應用場景的方法。
+今天我們實作了 `ConfigMap` 最常見的兩種使用方式，在官方文件中 `ConfigMap` 還有其他更進階的操作方式，這裡就先簡單介紹可以應付多數應用場景的方法。
+
+相關文章：
+
+- [從異世界歸來的第十六天 - Kubernetes Volume (一) - Volume 是什麼](https://ithelp.ithome.com.tw/articles/10291557)
+
+相關程式碼同時收錄在：
+
+[https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day18](https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day18)
 
 Reference
 
