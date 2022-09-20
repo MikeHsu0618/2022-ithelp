@@ -1,4 +1,5 @@
-# Day15 Kubernetes Volumes (五) - PV & PVC
+從異世界歸來的第二十天 - Kubernetes Volumes (五) - PV & PVC
+---
 
 ## 概述
 
@@ -10,7 +11,7 @@
 
 當我們作為一位系統管理者宣告了一塊存儲空間後，而系統的使用者就能以 `PVC` 來請求此存儲空間，形成下圖的關係：
 
-![pv&pvc](pv&pvc.png)
+
 
 ### ****Persistent Volume Claims (PVC)****
 
@@ -180,6 +181,14 @@ alpine-pod Sat Aug 6 03:32:30 UTC 2022
 `PV & PVC` 的觀念很廣牽涉的範圍也很宏觀，理解起來需要對 `Kubernetes` 以及服務的運作場景都要有不少的理解。這幾天認真的鑽研了 `PV & PVC` 的觀念後，剛好公司就需要用到。只能說保持資料的持久性這方面真的是一塊大議題，在 StackOverflow 中有網友分享道： `Kubernetes` 的精神更適合拿用來做 `Stateless` 的微服務，並且將需要持久性的資料抽象出來做為一個獨立服務並開放 API 以供其他服務取得。
 
 在最近的工作上也有更深的一層的認同，在小弟為了讓 `Google GKE` 上的多節點叢集實現共享持久性數據，就讓我把 Google 提供的 Kubernetes Provision storage 服務都實作過一次，分別是建立在 `Google FileStore` 的雲端 NFS 服務(實現了 ReadWriteMany)，以及建立在 `Google Compute Engine Disk` 的雲端硬碟服務(實現了 ReadWriteOnce)，兩種服務也對應了不同的情況，日後有機會可以再做一篇分享。
+
+相關文章：
+
+- [從異世界歸來的第十六天 - Kubernetes Volume (一) - Volume 是什麼](https://ithelp.ithome.com.tw/articles/10291557)
+
+相關程式碼同時收錄在：
+
+[https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day20](https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day20)
 
 Reference
 **[Using the Compute Engine persistent disk CSI Driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/gce-pd-csi-driver)**
