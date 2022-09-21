@@ -1,4 +1,5 @@
-# Day16 Kubernetes Resources（一） - Request / Limit
+從異世界歸來的第二一天 - Kubernetes Resources(一) - Request/Limit
+---
 
 ## 概述
 
@@ -34,16 +35,18 @@ request <= limit <= Infinity
 
 ## Resource 的種類 ： CPU、Memory
 
+![](https://478h5m1yrfsa3bbe262u7muv-wpengine.netdna-ssl.com/wp-content/uploads/image11.png)
+
 Kubernetes將底層處理器架構抽象為了計算資源，將它們按照需求暴露為原始值或基本單位。
 
 - CPU：對於CPU資源來說，這些基本單位是基於核心(cores)的；
 
   而一個CPU則相當於：
 
-    - 一個AWS vCPU
-    - 一個GCP Core
-    - 一個Azure vCore
-    - 英特爾處理器上一個 Hyperthread(處理器要支持Hyperthreading)
+  - 一個AWS vCPU
+  - 一個GCP Core
+  - 一個Azure vCore
+  - 英特爾處理器上一個 Hyperthread(處理器要支持Hyperthreading)
 - Memory：對於內存來說，則是基於字節的。內存資源可以使用單純的數值或帶有後綴(E、P、T、G、M、K)的定點整數表示，也就是我們常見的單位。
 
 ## Pod 的服務品質（QoS aka. Quality of Service)
@@ -52,25 +55,25 @@ Kubernetes 創建Pod 時就會依照設定的`Request/Limit`給它指定了下�
 
 ### Guaranteed
 
-當一個Pod內的每個容器，其request.memory等於limit.memory且request.cpu等於limit.cpu時，這個Pod被認為是Guaranteed。
+當一個Pod內的每個容器，其 request.memory 等於 limit.memory 且 request.cpu 等於 limit.cpu時，這個Pod被認為是Guaranteed。
 
 ```jsx
 apiVersion: v1
 kind: Pod
 metadata:
-    name: qos-demo
-namespace: qos-example
+  name: qos-demo
+  namespace: qos-example
 spec:
-    containers:
-        - name: qos-demo-ctr
-image: nginx
-resources:
-    limits:
+  containers:
+  - name: qos-demo-ctr
+    image: nginx
+    resources:
+      limits:
         memory: "200Mi"
-cpu: "700m"
-requests:
-    memory: "200Mi"
-cpu: "700m"
+        cpu: "700m"
+      requests:
+        memory: "200Mi"
+        cpu: "700m"
 ```
 
 ### Burstable
@@ -84,17 +87,17 @@ cpu: "700m"
 apiVersion: v1
 kind: Pod
 metadata:
-    name: qos-demo-2
-namespace: qos-example
+  name: qos-demo-2
+  namespace: qos-example
 spec:
-    containers:
-        - name: qos-demo-2-ctr
-image: nginx
-resources:
-    limits:
+  containers:
+  - name: qos-demo-2-ctr
+    image: nginx
+    resources:
+      limits:
         memory: "200Mi"
-requests:
-    memory: "100Mi"
+      requests:
+        memory: "100Mi"
 ```
 
 ### BestEffort
@@ -105,12 +108,12 @@ requests:
 apiVersion: v1
 kind: Pod
 metadata:
-    name: qos-demo-3
-namespace: qos-example
+  name: qos-demo-3
+  namespace: qos-example
 spec:
-    containers:
-        - name: qos-demo-3-ctr
-image: nginx
+  containers:
+  - name: qos-demo-3-ctr
+    image: nginx
 ```
 
 查上以上產生出來的 `qosClass` **：**
@@ -119,13 +122,13 @@ image: nginx
 kubectl get pod qos-demo-3 --output=yaml
 ---------
 
-    spec:
-containers:
+spec:
+  containers:
     ...
-resources: {}
-...
+    resources: {}
+  ...
 status:
-    qosClass: BestEffort / Burstable / Guaranteed
+  qosClass: BestEffort / Burstable / Guaranteed
 ```
 
 Kubernetes根據上述不同類型的pod，將給出不同的資源使用權和優先級。 `Best-Effort` Pods 有著最低的優先級，在系統內存不足時，它們是第一批被清理的對象。`Guaranteed` Pods有著最高的優先級，通常不會被殺死或節流，除非資源使用超過了limits的限制並且沒有其它更低優先級的pods可清理了。最後，`Burstable` Pods有著最小的資源保證但是條件允許時允許使用更多的計算資源。在沒有`Best-Effort` Pods存在並且系統容量不足時，`Burstable` Pods將是集群中第一批被殺死的。
@@ -133,6 +136,11 @@ Kubernetes根據上述不同類型的pod，將給出不同的資源使用權和�
 ## 結論
 
 看完上述的觀念介紹我們可以了解到 `request` 和 `limit` 與 Pods 的命運息息相關，主要的動機不外乎是想要更安全高效的使用計算資源，並確保高優先級的 Pods 正常執行，同時保證資源不會被過度使用。此外如果將 `limit` 的設定高於 `request` ，則代表著當資源充足時，Pods 可以利用更多的資源。
+
+
+相關程式碼同時收錄在：
+
+[https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day21](https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day21)
 
 Reference
 
