@@ -1,4 +1,5 @@
-# Day18 Kubernetes Resources(三) - LimitRange
+從異世界歸來的第二三天 - Kubernetes Resources(三) - LimitRange
+---
 
 ## 概述
 
@@ -7,7 +8,7 @@
 在默認情況下， `Kubernetes` 在容器的運行上使用的資源是沒有受到限制的，而身為管理者的我們可以利用 `Namespace` 為單位限制資源的使用以及創建，接下來我們就要繼續深入關於資源的進階觀念 `LimitRange` 。
 
 ### 什麼是 `LimitRange` ?
-
+![https://ithelp.ithome.com.tw/upload/images/20220923/20149562hgaMUTpjSU.png](https://ithelp.ithome.com.tw/upload/images/20220923/20149562hgaMUTpjSU.png)
 依附在 `Namespace` 下的 `LimitRange` 可以使管理員限制該 `Namespace` 下一個 `Pod` 或資源最多能夠使用資源配額所定義的 CPU 或內存用量。畢竟如果當一個 `Pod` 沒有被限制時，是有機會壟斷整個節點的可用資源的，而 `LimitRange` 即是在 `Namespace` 內限制資源分配的的策略對象(Policy)。
 
 一個 **`LimitRange`** 提供的限制能夠做到：
@@ -138,6 +139,15 @@ pods "limit-range-pod" is forbidden: minimum cpu usage per Container is 200m, bu
 ## 結論
 
 `Namespace` 使我們容易的做資源作分配，在加上 `LimitRange` 以及 `RequestQaota` 等以命名空間為單位的資源配置對象，讓我們可以靈活的位不同的部門規劃對應的資源配置。關於後者 `RequestQaota` 的使用方法一樣也是圍繞在 `Limit/Request` 上，相信這方面的觀念是一通百通，就稍微節省了一些篇幅讓各位細細的品嚐吧～ XD
+
+
+相關文章：
+- [從異世界歸來的第二一天 - Kubernetes Resources(一) - Request/Limit](https://ithelp.ithome.com.tw/articles/10295419)
+- [從異世界歸來的第二二天 - Kubernetes Resources(二) - Namespace](https://ithelp.ithome.com.tw/articles/10296200)
+
+相關程式碼同時收錄在：
+
+[https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day23](https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day23)
 
 Reference
 
