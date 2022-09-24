@@ -1,4 +1,5 @@
-# Day19 Kubernetes Resources(四) - Metrics-Server
+從異世界歸來的第二四天 - Kubernetes Resources(四) - Metrics Server 安裝
+---
 
 ## 概述
 
@@ -8,7 +9,7 @@
 
 `Docker-Desktop` 提供的 `Kubernetes` 沒有幫我們預設安裝 Metrics Server，而像是 GKE 在一開始使用上就可以使用 Google 自帶的資源監控服務，這些資源指標 API 透過 API Server `/apis/metrics.k8s.io` 進行存取，Metrics Server 是集群級別的數據聚和器(aggregator)，透過將 `kube-aggregator` 佈署到 API Server 上，基於 `kubelet` 收集各個節點的指標數據再將數據儲存在 Metrics Server 的 Memory 中(代表不會保存歷史數據，重啟資料就會消失)，再以 API 的形式提供出來。
 
-![metrics-api](metrics-api.png)
+![https://ithelp.ithome.com.tw/upload/images/20220924/201495628ps2sa952O.png](https://ithelp.ithome.com.tw/upload/images/20220924/201495628ps2sa952O.png)
 
 ### 安裝 Metrics Server
 
@@ -261,6 +262,15 @@ vpnkit-controller                        1m           0Mi
 ## 結論
 
 有個這等資源指標收集工具，讓我們對資源監控的領域跨出了一大步，有了監控使我們可以更進一步的對整個集群依照指標做出更多自動化的設定，像是我們接下來要講到的 `AutoScaling` ，因為再使用他之前，建立好 Metrics Server 是他最基本的要求。
+
+
+相關文章：
+- [從異世界歸來的第二一天 - Kubernetes Resources(一) - Request/Limit](https://ithelp.ithome.com.tw/articles/10295419)
+- [從異世界歸來的第二二天 - Kubernetes Resources(二) - Namespace](https://ithelp.ithome.com.tw/articles/10296200)
+
+相關程式碼同時收錄在：
+
+[https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day24](https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day24)
 
 Reference
 
