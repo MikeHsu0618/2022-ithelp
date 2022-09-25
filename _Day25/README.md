@@ -1,10 +1,13 @@
-# Day 20 Kubernetes AutoScaling (一)
+從異世界歸來的第二五天 - Kubernetes AutoScaling (一) - AutoScaling 是什麼
+---
 
 ## 概述
 
-在前面的幾天裡，我們認識了很多關於資源配置以及監控的觀念，但如果我們掌握了這些資源指標卻只能手動調整就感覺失去了靈魂一樣，於是就有了自動化資源配置的 `AutoScaling` 出現， `AutoScaling` 簡單來說就是圍繞在你設定的資源配置並監控資源使用率去對系統做出水平、垂直、多維拓展或縮減來應對系統負載的波動，但需要再次強調的是，這一切都是建立在已經設定好資源配置以及 Metrics Server 為前提才能實現～。
+在前面的幾天裡，我們認識了很多關於資源配置以及監控的觀念，但如果我們掌握了這些資源指標卻只能手動調整就感覺失去了靈魂一樣，於是就有了自動化資源配置的 `AutoScaling` 出現， `AutoScaling` 簡單來說就是圍繞在你設定的資源配置並監控資源使用率去對系統做出水平、垂直、多維擴展或縮減來應對系統負載的波動，但需要再次強調的是，這一切都是建立在已經設定好資源配置以及 Metrics Server 為前提才能實現～。
 
 ## Autoscalers 的種類
+
+![https://ithelp.ithome.com.tw/upload/images/20220925/20149562EJVuVbTqQA.png](https://ithelp.ithome.com.tw/upload/images/20220925/20149562EJVuVbTqQA.png)
 
 ### Cluster Autoscaler（CA）
 
@@ -13,14 +16,14 @@
 - Scale-up：有 `Pod` 的狀態為 `unschedulable` 的十秒左右時將會迅速的判斷是否需要縱向擴展，需要注意的是縱向擴展的動作可以在十秒內左右完成，而開啟機器的時間可能需要數分鐘到十來分鐘才能處於可用狀態。
 - Scale-down：每隔一段時間(預設為十秒)檢查 CPU 以及內存請求總和是否低於 50 %，並且沒有 `Pod` 或 `Node` 調度條件限制。
 - 部分設定設不好會讓 CA 沒辦法自動擴展
-    - CA 要關 node 然後 evict pod 時違反 Pod affinity/anti-affinity 和 PodDisruptionBudget
-    - 在 node 加上 annotation 可防止被 scale down：`"cluster-autoscaler.kubernetes.io/scale-down-disabled": "true"`
+  - CA 要關 node 然後 evict pod 時違反 Pod affinity/anti-affinity 和 PodDisruptionBudget
+  - 在 node 加上 annotation 可防止被 scale down：`"cluster-autoscaler.kubernetes.io/scale-down-disabled": "true"`
 
 就像是上面有提到的 `Cluster Auotscaler` 是屬於集群等級的調節者，所以我們在本地只有一個 node 的 `docker-desktop` 是沒辦法實際體驗到他的厲害之處，如果我們使用的是平台等級的 `Kubernetes` ，像是 `Gcp GKE` `Aws EKS` 等等，此類雲端平台整合更全面的資源並做出更高層級的自動調度。
 
 ### Horizontal Pod Autoscaler（HPA）
 
-![horizontal-pod-autoscaler.svg](horizontal-pod-autoscaler.svg)
+![https://ithelp.ithome.com.tw/upload/images/20220925/20149562YAYOFJSBOc.png](https://ithelp.ithome.com.tw/upload/images/20220925/20149562YAYOFJSBOc.png)
 
 調節 `Pod` 數量的 autoscaler，屬於 pod level ，負責在負載波動時自動擴展或縮減 `Pod` 到設定的最大數量以及最小數量。
 
@@ -38,10 +41,7 @@
 - 可以設定 custom/external metrics 來觸發 autoscaling。
 - v2beta2 以上的 HPA 才有內存可以檢查，v1 只能檢查 CPU utilization。
 
-<aside>
-💡 目前 HPA 的 Api 更新的非常快，網路上的範例可以找到 v1、v2、v2beta2…等版本的範例教學，但只有從 v2beta2 開始才支援 metric 內存，所以還是建議多翻閱最新的 API 文件。
-
-</aside>
+> 目前 HPA 的 Api 更新的非常快，網路上的範例可以找到 v1、v2、v2beta2…等版本的範例教學，但只有從 v2beta2 開始才支援 metric 內存，所以還是建議多翻閱最新的 API 文件。
 
 ### Vertical Pod Autoscaler（VPA）
 
@@ -53,12 +53,12 @@
 - VPA 的改動會參考 Pod 的 `history data`。
 - 目前 VPA 還不能跟 HPA 一起混用，除非 HPA 使用得是 custom metric 當作 trigger，亦或者是！使用了下面介紹的 MPA（多維 Pod 自動擴縮）可以達到同時進行 VPA 和 HPA。
 
-<aside>
-💡 VPA 跟 Metrics Server 一樣都是 `custom resources` ，代表他們不一定會預設安裝在 `Kubernetes` 當中。但很多核心功能都仰賴這些 `custom resources` 來實現，這一切都讓 `Kubernetes` 更加模組化。
+> VPA 跟 Metrics Server 一樣都是 `custom resources` ，代表他們不一定會預設安裝在 `Kubernetes` 當中。但很多核心功能都仰賴這些 `custom resources` 來實現，這一切都讓 `Kubernetes` 更加模組化。
 
-</aside>
 
-### **Multidim Pod Autoscaler**（MPA）
+### Multidim Pod Autoscaler（MPA）
+
+![https://ithelp.ithome.com.tw/upload/images/20220925/20149562oVluQZSCAb.png](https://ithelp.ithome.com.tw/upload/images/20220925/20149562oVluQZSCAb.png)
 
 MPA (多維 Pod 自動擴縮) 可以讓我們同時選擇多種方法來擴縮集群，目前只有 `GCP GKE` 有提供這種多維度的擴縮操作，在偉栽 Google 爸爸的之外也體會到了，因為 `Kubernetes` 開源社群中的 `autoscaler` 專案還沒實現多維擴縮 ，所以各大雲端平台都不支持並且都在等開源社群生出新功能再包進自己的雲端平台裡，非常的邪惡～
 
@@ -71,6 +71,11 @@ MPA (多維 Pod 自動擴縮) 可以讓我們同時選擇多種方法來擴縮�
 ## 結論
 
 大略介紹完了 `AutoScaling` 的種類，可以發現不管到哪裡資源的監控以及配置都是必修課題，畢竟沒有一個老闆願意多花一分冤枉錢，同時我們也可以觀察到 `Kubernetes` 在這一部分很多地方都需要仰賴 `custom resources` 來實現，並且這些功能都不能說到完善的階段，迭代是非常非常的快，只能送他老話一句：『別再更新了，老子學不動啦！』
+
+
+相關程式碼同時收錄在：
+
+[https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day24](https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day24)
 
 Reference
 
