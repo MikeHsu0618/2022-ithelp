@@ -1,8 +1,10 @@
-# Day21 Kubernetes AutoScaling(二) - Horizontal Pod Autoscaler
-
+從異世界歸來的第二六天 - Kubernetes AutoScaling(二) - Horizontal Pod Autoscaler
+---
 ## 概述
 
 在前面的種類介紹中我們知道了HPA 的精隨就在於如何在適時的自動擴縮避免資源光轉或負載過高，常常見到的情境差不多就像是搶票系統、訂餐系統…等，可以想像這些服務都屬於在某個特定時段都會迎接一段大量服務需求的尖峰，像是午餐時間可以大膽斷定熊貓外送服務用的人一定多到爆炸 XD，雖然大部分的尖峰時刻是可以預期的，但我們就一定需要我們的 DevOps 每天都在特定時間提高服務負載能力嗎？那如果今天的負載是突如其來不可預期的呢？難道這時候就只能準備主機板出來跪了(？，還好我們有 `Kubernetes` 的 autoscaler 自動化管理服務擴縮，使我們在面對服務尖峰時能夠在短短十來秒中馬上做出反應，接下來利用 HPA 實際練習來加深我們的概念吧。
+
+![https://ithelp.ithome.com.tw/upload/images/20220926/201495623BkYTGcWhr.png](https://ithelp.ithome.com.tw/upload/images/20220926/201495623BkYTGcWhr.png)
 
 ### 確認 Metrics Server 是否就緒
 
@@ -232,6 +234,14 @@ php-apache   Deployment/php-apache   2%/80%, 33%/50%                1         10
 ## 結論
 
 在我們簡單的練習 HPA 後，相信大夥也對 HPA 有了更深的一層體會，但還是必須強調資源監控以及調度實在是一們很深的學問， `Kubernetes` 的 HPA 確實可以提供給我們最基本的容器擴縮功能，可是在真正的大流量正式環境中需要更細緻的設定和更多的依賴外部資源指標，例如在某些熱點新聞的高流量下2分鐘內就需要擴容上千台機器， `Kubernetes` 默認的彈性擴容是解決不了這個問題的，這時候有些人就會想到 `Grafana` 與 `Prometheus` 這套監控組合神拳（遠目，只能說繼續學習下去遲早有天會可以輪到他們的。
+
+
+相關文章：
+- [從異世界歸來的第二五天 - Kubernetes AutoScaling (一) - AutoScaling 是什麼](https://ithelp.ithome.com.tw/articles/10298125)
+
+相關程式碼同時收錄在：
+
+[https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day26](https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day26)
 
 Reference
 
