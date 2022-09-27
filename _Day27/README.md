@@ -1,21 +1,5 @@
-# Day22 Kubernetes Autoscaling (三) - Vertical Pod  Autoscaler
-
-## 概述
-
-介紹完 HPA 水平擴展後，接下來當然就是我們的 VPA 垂直擴展囉！在我個人看來一開始運行一個完全沒有使用過的服務時，是不會清楚知道需要配置多少資源給這項服務的，需要人工長期的觀察調教才能達到理想狀態，如果有個客觀的服務可以給你推薦甚至是自動調整，畫面有點太美，那一定就是 VPA 。有鑑於 VPA 都可以推出兩年有了（？，但 `Kubernetes` 官方文件中仍然找不到相關的介紹或教學範例，所以以下統整了多方資源再介紹更多有關 VPA 的各種小細節。
-
-### 確認 Metrics Server 是否就緒
-
-在進行之前，我們需要擁有一個已配置 Metrics Server 的 `Kubernetes` 集群用來收集各種資源指標當作 `autoscaling` 的依據。
-
-```jsx
-kubectl top node
--------
-NAME             CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%   
-docker-desktop   258m         6%     5717Mi          72%
-```
-
-如果還沒有安裝的朋友可以參考前面 Metrics Server 篇來安裝。
+從異世界歸來的第二七天 - Kubernetes Autoscaling (三) - Vertical Pod Autoscaler
+---
 
 ## VPA 元件以及運作流程
 
@@ -35,7 +19,7 @@ VPA 運作流程只要由三個主要的元件主成：
 
 - Updater 驅逐 Pod 後並且在 Deployment 重新建立 Pod 前，將會透過 Webhook 觸發 Admission Controller 去更新該 `requests/limits` 。
 
-![vpa.png](vpa.png)
+![https://ithelp.ithome.com.tw/upload/images/20220927/20149562rXpbyFG0AL.png](https://ithelp.ithome.com.tw/upload/images/20220927/20149562rXpbyFG0AL.png)
 
 從上圖我們可以清楚的理解三個元件彼此互動的模式。
 
@@ -278,7 +262,7 @@ spec:
 - `Off` ：VPA 只會提供推薦資源配置，不會自動的調整任何設定。
 - `Initial` ：VPA 只會在 Pod 被建立時調整資源配置並且不會再有任何自動調整。
 - `Auto` ：VPA 將會自動配置 Recommender 提供的配置。
-- `Recreate` ：以 `Auto` 的差別在於，每次重啟 Pod 都會 `recreate` （很少用到）。
+- `Recreate` ：和 `Auto` 類似差別在於每次重啟 Pod 都會 `recreate` （很少用到）。
 
 `spec.resourcePolicy.containerPolicies` ：
 
