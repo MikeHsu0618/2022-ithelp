@@ -1,4 +1,5 @@
-# 從異世界歸來的第二八天 - Kubernetes Authorization (一) - 使用 Context 進行用戶管理
+從異世界歸來的第二八天 - Kubernetes Authorization (一) - 使用 Context 進行用戶管理
+---
 
 ## 概述
 
@@ -12,11 +13,13 @@
 
 Kubernetes API 請求從發起到持久化到ETCD資料庫中的過程如下：
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/5a1f51ed-bd15-4c53-91df-a31d6e28ab0f/Untitled.png)
+![https://ithelp.ithome.com.tw/upload/images/20220928/20149562xWEHihpdXJ.png](https://ithelp.ithome.com.tw/upload/images/20220928/20149562xWEHihpdXJ.png)
 
 接下來我們使用 Kubernetes Context 實戰我們在工作中會面對到的用戶管理認證(Authentication) 問題。
 
 ## Kubernetes Context 是什麼？
+
+![https://ithelp.ithome.com.tw/upload/images/20220928/20149562DuzrV22d16.png](https://ithelp.ithome.com.tw/upload/images/20220928/20149562DuzrV22d16.png)
 
 在 `Kubernetes` 中，一個 Context 就像是一個方便好讀在客戶端紀錄著你與集群要如何溝通的 `Alias` ，假如我切換到某個群集後，那我在 kubectl 送出的每個指令都會指向該 `Context` 所設定的 `cluster` 、`namespace` 、`user` 執行操作。很重要的一點是 `kube-apiserver` 是看不懂所謂的 `Context` 的，而是在請求送出之前幫我們在客戶端把相關設定轉為參數送出，所以才呼應了前面提到的 `Alias` 概念。
 
@@ -252,7 +255,7 @@ kubectl config set-credentials \
 
 相關程式碼同時收錄在：
 
-[https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day2](https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day25)8
+[https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day28](https://github.com/MikeHsu0618/2022-ithelp/tree/master/Day28)
 
 Reference
 
