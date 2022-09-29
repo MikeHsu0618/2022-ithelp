@@ -48,7 +48,7 @@ yes
 
 ## 實戰使用 RBAC(Role-Base Access Control)
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/40ed3694-c2bc-48fd-ae16-e46d4c8baa48/Untitled.png)
+![https://ithelp.ithome.com.tw/upload/images/20220929/20149562O5YPYptWMy.png](https://ithelp.ithome.com.tw/upload/images/20220929/20149562O5YPYptWMy.png)
 
 `Role-Base Access Control` 顧名思義是指基於 Role 的概念建立的訪問控制，用來調節使用者對 Kubernetes API Server 的訪問的方法，在各類大型系統以及各種雲端平台中廣泛使用。
 
@@ -158,7 +158,7 @@ kubectl config set-context only-view --cluster=docker-desktop --user=pod-viewer
 Context "only-view" created.
 ```
 
-這裡我們建立了一個 `Context` ，指向我們現有的 `docker-desktop` 集群，而 user 是 還沒被認證的 `pod-viewer` 。
+這裡我們建立了一個 `Context` ，指向我們現有的 `docker-desktop` 集群，而 `user` 是還沒被授權的 `pod-viewer` 。
 
 查看 `kubeconfig` 中的設定一下：
 
@@ -215,7 +215,7 @@ Error from server (Forbidden): pods is forbidden: User "pod-viewer" cannot list 
 
 在開始操作之前我們需要對 `RBAC` 有進一步的了解，它是 `Kubernetes` v1.8 正式引入的 Authorization 機制，也就是一種管制訪問 k8s API 的機制。管理者可以透過 `rbac.authorization.k8s.io`這個 API 群組來進行動態的管理配置。主要由 Role、ClusterRole、RoleBinding、ClusterRoleBinding 等資源組成。
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/30832101-7907-4b15-a568-98e1e0524f8a/Untitled.png)
+![https://ithelp.ithome.com.tw/upload/images/20220929/20149562PYHD14cXKE.png](https://ithelp.ithome.com.tw/upload/images/20220929/20149562PYHD14cXKE.png)
 
 透過適當的教色配置與授權分配，管理者可以決定使用者可以使用哪些功能。在 `RBAC` 下的角色會被賦予指定的權限(permission) 並實現最小權限源則，對比於限制特定權限的方式更為嚴謹。
 
@@ -281,7 +281,7 @@ role.rbac.authorization.k8s.io/pod-viewer created
 
 以上我們已經擁有了一個帶有授權的 Role，下一步我們需要將此角色綁定到指定使用者，才能將角色中定義好的授權賦予給一個或一組使用者使用，及是以下的 `Subject` 代表被綁定的對象。
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/1120a325-c0d5-4b89-8be1-f8701e77c71f/Untitled.png)
+![https://ithelp.ithome.com.tw/upload/images/20220929/20149562tW6IxaufUw.png](https://ithelp.ithome.com.tw/upload/images/20220929/20149562tW6IxaufUw.png)
 
 被綁定的對象可以是
 
@@ -322,7 +322,7 @@ subjects:
 ```
 
 <aside>
-💡 前綴 `system:` 是Kubernetes 系統保留的，所以你要確保所配置的用戶名或者組名不能出現上述 `system:` 前綴。除了對前綴的限制之外，RBAC 鑑權系統不對用戶名格式作任何要求。
+? 前綴 `system:` 是Kubernetes 系統保留的，所以你要確保所配置的用戶名或者組名不能出現上述 `system:` 前綴。除了對前綴的限制之外，RBAC 鑑權系統不對用戶名格式作任何要求。
 
 </aside>
 
@@ -336,9 +336,9 @@ metadata:
   name: pod-viewer-rolebinding
   namespace: default #授權的名稱空間為 default
 subjects:
-- kind: User
-  name: pod-viewer # 繫結 pod-viewer 使用者
-  apiGroup: rbac.authorization.k8s.io
+  - kind: User
+    name: pod-viewer # 繫結 pod-viewer 使用者
+    apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
   name: pod-viewer # 繫結 Role
@@ -365,12 +365,12 @@ Switched to context "pod-viewer".
 
 ```yaml
 # 成功取得 pod 資訊(此時沒有任何 pod 在執行)
-kubectl get pod -n default
-------
-No resources found in default namespace.
+  kubectl get pod -n default
+  ------
+  No resources found in default namespace.
 
-# 成功收到 forbidden 阻止查看資源
-kubectl get pod -n kube-system
+  # 成功收到 forbidden 阻止查看資源
+  kubectl get pod -n kube-system
 Error from server (Forbidden): pods is forbidden: User "pod-viewer" cannot list resource "pods" in API group "" in the namespace "kube-system"
 ```
 
