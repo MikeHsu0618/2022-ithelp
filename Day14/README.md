@@ -127,13 +127,13 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      app: bar
-      version: v1
+      app: my-app
+      version: v2
   template:
     metadata:
       labels:
-        app: bar
-        version: v1
+        app: my-app
+        version: v2
     spec:
       containers:
         - name: bar
