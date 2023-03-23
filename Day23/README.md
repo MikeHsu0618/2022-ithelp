@@ -36,7 +36,7 @@ Context "docker-desktop" modified
 
 ### 創建聲明默認資源配額的 LimitRange
 
-```jsx
+```yaml
 # limit-range.yaml
 apiVersion: v1
 kind: LimitRange
@@ -44,14 +44,13 @@ metadata:
   name: limit-range
 spec:
   limits:
-		- max:
-	      cpu: 1000m
-				memory: 500Mi
-	    min:
-	      cpu: 500m
-				memory: 200Mi 
+    - default:
+        cpu: 1000m
+        memory: 500Mi
+      defaultRequest:
+        cpu: 500m
+        memory: 200Mi
       type: Container
-
 ```
 
 查看一下剛剛建立的 `LimitRange` :
