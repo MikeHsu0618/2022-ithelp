@@ -94,7 +94,7 @@ pvc-demo   Bound    pvc-c197c285-d314-43db-8cbc-6f912d8a9680   1Gi        RWO   
 
 這時我們再度拿出前幾天使用的 `emptyDir volume` 範例，將他由同個 `Pod` 分離成不同 `Pod` 來查看 `PV ＆ PVC` 的生命週期是否獨立於 `Pod` 。
 
-```jsx
+```yaml
 # nginx-pod.yaml
 apiVersion: v1
 kind: Pod
@@ -104,17 +104,17 @@ spec:
   containers:
     - name: nginx
       image: nginx:latest
-			volumeMounts:
-				- name: html
+      volumeMounts:
+        - name: html
           mountPath: /usr/share/nginx/html
-    volumes:
-      - name: html
-        persistentVolumeClaim:
-          claimName: pvc-demo
-          readOnly: false
+  volumes:
+    - name: html
+      persistentVolumeClaim:
+        claimName: pvc-demo
+        readOnly: false
 ```
 
-```jsx
+```yaml
 # alpine-pod.ymal
 apiVersion: v1
 kind: Pod
@@ -130,14 +130,14 @@ spec:
           echo $(hostname) $(date) >> /html/index.html;
           sleep 10;
           done
-			volumeMounts:
+      volumeMounts:
         - name: html
           mountPath: /html
-    volumes:
-      - name: html
-        persistentVolumeClaim:
-          claimName: pvc-demo
-          readOnly: false
+  volumes:
+    - name: html
+      persistentVolumeClaim:
+        claimName: pvc-demo
+        readOnly: false
 ```
 
 將以上兩個掛在了 `PVC` 的 `Pod` 運行起來：
