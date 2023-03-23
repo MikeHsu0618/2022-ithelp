@@ -44,9 +44,9 @@ COMMENT ON COLUMN posts.title IS '標題';
 ```
 
 ```jsx
-kubectl create configmap pg-initsql --from-file=initdb.sql
+kubectl create configmap pg-initdb --from-file=initdb.sql
 --------
-configmap/pg-initsql createdg-initsql
+configmap/pg-initdb createdg-initdb
 ```
 
 利用 `kubectl create` 指令將整個檔案設定成一個 `configMap`
