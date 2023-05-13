@@ -1,12 +1,19 @@
 namePrefix: development-
+nameSuffix: -v2
+
+namespace: development-namesapce
+
 commonLabels:
   app: Production-hello
   variant: Production
   org: acmeCorporation
+
 commonAnnotations:
   note: Hello, I am Production!
+
 resources:
   - ../../base
+
 patchesStrategicMerge:
   - configMap.yaml
 
