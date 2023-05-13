@@ -1,0 +1,31 @@
+namePrefix: development-
+commonLabels:
+  app: development-hello
+  variant: development
+  org: acmeCorporation
+commonAnnotations:
+  note: Hello, I am development!
+resources:
+  - ../../base
+patchesStrategicMerge:
+  - configMap.yaml
+
+images:
+  # images.name defines the images name which will be replaced
+  - name: monopole/hello
+    newName: monopole/hello
+    newTag: development
+patches:
+  - patch: |
+      - op: replace
+        path: /metadata/name
+        value: the-deployment-deveploment
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: the-container-development
+    target:
+      # group, version can think of apiVersion is optional, ex: apps/v1
+      group: apps
+      kind: Deployment
+      version: v1
+      name: the-deployment
