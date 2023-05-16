@@ -16,6 +16,7 @@ images:
     newName: monopole/hello
     newTag: development
 patches:
+  # patchJson6902, patchesStrategicMerge are both deprecated in future
   - patch: |
       - op: replace
         path: /metadata/name
@@ -24,7 +25,7 @@ patches:
         path: /spec/template/spec/containers/0/name
         value: the-container-development
     target:
-      # group, version can think of apiVersion is optional, ex: apps/v1
+      # group, kind, version can think of apiVersion is optional, ex: apps/v1
       group: apps
       kind: Deployment
       version: v1
