@@ -1,32 +1,34 @@
-namePrefix: development-
-commonLabels:
-  app: development-hello
-  variant: development
-  org: acmeCorporation
-commonAnnotations:
-  note: Hello, I am development!
 resources:
   - ../../base
-patchesStrategicMerge:
-  - configMap.yaml
+
+namePrefix: prod-
+
+namespace: production-namesapce
+
+commonLabels:
+  type: prod-demo
+  app: prod-foo
+
+commonAnnotations:
+  note: Hello, I am Production!
 
 images:
   # images.name defines the images name which will be replaced
-  - name: monopole/hello
-    newName: monopole/hello
-    newTag: development
+  - name: mikehsu0618/api-service
+    newTag: production
+
 patches:
   # patchJson6902, patchesStrategicMerge are both deprecated in future
   - patch: |
       - op: replace
         path: /metadata/name
-        value: the-deployment-development
+        value: the-prod-development
       - op: replace
         path: /spec/template/spec/containers/0/name
-        value: the-container-development
+        value: the-prod-container
     target:
       # group, kind, version can think of apiVersion is optional, ex: apps/v1
       group: apps
       kind: Deployment
       version: v1
-      name: the-deployment
+      name: foo-deployment-v1
